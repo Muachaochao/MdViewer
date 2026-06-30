@@ -84,13 +84,23 @@ dotnet run --project .\MdViewer\MdViewer.csproj -- .\测试文档.md
 
 ## Markdown 图片路径
 
-项目通过 WebView2 虚拟主机映射当前 Markdown 文件所在目录，让文档中的相对图片可以正常显示。例如：
+项目通过 WebView2 虚拟主机映射当前 Markdown 文件所在目录，让文档中的相对图片可以正常显示。例如，Markdown 中可以这样写：
 
 ```markdown
 ![设备图片](images/device.png)
 ```
 
-只要 `images/device.png` 相对当前 Markdown 文件存在，就可以显示。
+上面是写法示例。实际显示图片时，图片文件必须真实存在，并且路径要相对当前 Markdown 文件正确。
+
+仓库中的测试图片示例：
+
+![Markdown 相对图片示例](imgtest/images/demo.png)
+
+这张图片来自：
+
+```text
+imgtest/images/demo.png
+```
 
 ## 翻译功能
 
@@ -131,4 +141,3 @@ dotnet run --project .\MdViewer\MdViewer.csproj -- .\测试文档.md
 - 更精致的文件夹树图标和选中态
 - 多标签页阅读
 - 文档历史版本比较
-
