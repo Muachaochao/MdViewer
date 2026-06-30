@@ -1,0 +1,38 @@
+## Visual Studio / Rider
+.vs/
+.idea/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+## Build outputs
+bin/
+obj/
+[Bb]in/
+[Oo]bj/
+TestResults/
+
+## .NET
+*.nupkg
+*.snupkg
+project.assets.json
+project.nuget.cache
+
+## WebView2 / local app data
+WebView2/
+
+## Logs and temp files
+*.log
+*.tmp
+*.temp
+~$*
+
+## OS files
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## Generated preview/export files
+markdown-preview.pdf
+*.pdf

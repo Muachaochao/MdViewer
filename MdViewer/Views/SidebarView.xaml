@@ -1,0 +1,264 @@
+﻿<UserControl x:Class="MdViewer.Views.SidebarView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:MdViewer.Views"
+             Background="{DynamicResource SidebarBrush}">
+    <UserControl.Resources>
+        <local:BoolToCollapsedConverter x:Key="BoolToCollapsedConverter"/>
+
+        <Style x:Key="SidebarActionButtonStyle" TargetType="Button" BasedOn="{StaticResource AppleButtonStyle}">
+            <Setter Property="MinHeight" Value="24"/>
+            <Setter Property="Padding" Value="8,3"/>
+            <Setter Property="FontSize" Value="12"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderBrush" Value="{DynamicResource ButtonBorderBrush}"/>
+            <Setter Property="Background" Value="{DynamicResource ButtonBackgroundBrush}"/>
+        </Style>
+
+        <HierarchicalDataTemplate x:Key="FolderTreeTemplate"
+                                  ItemsSource="{Binding Children}">
+            <Button Style="{StaticResource SidebarItemButtonStyle}"
+                    ToolTip="{Binding Path}"
+                    Command="{Binding DataContext.OpenTreeItemCommand,
+                              RelativeSource={RelativeSource AncestorType=TreeView}}"
+                    CommandParameter="{Binding}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="22"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding Icon}"
+                               FontSize="13"
+                               VerticalAlignment="Center"
+                               Opacity="0.85"/>
+                    <TextBlock Grid.Column="1"
+                               Text="{Binding Name}"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               FontSize="13"
+                               TextTrimming="CharacterEllipsis"
+                               VerticalAlignment="Center"/>
+                </Grid>
+            </Button>
+        </HierarchicalDataTemplate>
+
+        <Style TargetType="TreeView">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="0"/>
+        </Style>
+
+        <Style TargetType="TreeViewItem">
+            <Setter Property="Foreground" Value="{DynamicResource TextPrimaryBrush}"/>
+            <Setter Property="Margin" Value="0,1"/>
+            <Setter Property="Padding" Value="0"/>
+            <Setter Property="IsExpanded" Value="True"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TreeViewItem">
+                        <StackPanel>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="18"/>
+                                    <ColumnDefinition Width="*"/>
+                                </Grid.ColumnDefinitions>
+                                <ToggleButton x:Name="Expander"
+                                              Grid.Column="0"
+                                              Width="16"
+                                              Height="24"
+                                              Focusable="False"
+                                              IsChecked="{Binding IsExpanded, RelativeSource={RelativeSource TemplatedParent}}"
+                                              ClickMode="Press"
+                                              Background="Transparent"
+                                              BorderThickness="0">
+                                    <TextBlock x:Name="Chevron"
+                                               Text="›"
+                                               Foreground="{DynamicResource TextSecondaryBrush}"
+                                               FontSize="16"
+                                               HorizontalAlignment="Center"
+                                               VerticalAlignment="Center"/>
+                                </ToggleButton>
+                                <Border x:Name="HeaderHost"
+                                        Grid.Column="1"
+                                        CornerRadius="9"
+                                        Background="Transparent">
+                                    <ContentPresenter x:Name="PART_Header"
+                                                      ContentSource="Header"
+                                                      HorizontalAlignment="Stretch"/>
+                                </Border>
+                            </Grid>
+                            <ItemsPresenter x:Name="ItemsHost" Margin="18,0,0,0"/>
+                        </StackPanel>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsExpanded" Value="False">
+                                <Setter TargetName="ItemsHost" Property="Visibility" Value="Collapsed"/>
+                            </Trigger>
+                            <Trigger Property="HasItems" Value="False">
+                                <Setter TargetName="Expander" Property="Visibility" Value="Hidden"/>
+                            </Trigger>
+                            <Trigger Property="IsExpanded" Value="True">
+                                <Setter TargetName="Chevron" Property="RenderTransform">
+                                    <Setter.Value>
+                                        <RotateTransform Angle="90"/>
+                                    </Setter.Value>
+                                </Setter>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="HeaderHost" Property="Background" Value="{DynamicResource SelectionBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <DataTemplate x:Key="FileItemTemplate">
+            <Button Style="{StaticResource SidebarItemButtonStyle}"
+                    ToolTip="{Binding FilePath}"
+                    Tag="{Binding DataContext, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                    Command="{Binding DataContext.OpenCommand,
+                              RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                    CommandParameter="{Binding FilePath}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="{Binding FileName}"
+                               Foreground="{DynamicResource TextPrimaryBrush}"
+                               TextTrimming="CharacterEllipsis"/>
+                    <TextBlock Grid.Column="1"
+                               Text="已删除"
+                               Foreground="#D70015"
+                               FontSize="11"
+                               VerticalAlignment="Center"
+                               Margin="8,0,0,0"
+                               Visibility="{Binding Exists, Converter={StaticResource BoolToCollapsedConverter}}"/>
+                </Grid>
+                <Button.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Header="打开所在文件夹"
+                                  Command="{Binding PlacementTarget.Tag.OpenFolderCommand,
+                                      RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding PlacementTarget.DataContext,
+                                      RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                        <MenuItem Header="复制路径"
+                                  Command="{Binding PlacementTarget.Tag.CopyPathCommand,
+                                      RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding PlacementTarget.DataContext,
+                                      RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                        <MenuItem Header="收藏 / 取消收藏"
+                                  Command="{Binding PlacementTarget.Tag.ToggleFavCommand,
+                                      RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding PlacementTarget.DataContext,
+                                      RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                        <Separator/>
+                        <MenuItem Header="从列表移除"
+                                  Command="{Binding PlacementTarget.Tag.RemoveCommand,
+                                      RelativeSource={RelativeSource AncestorType=ContextMenu}}"
+                                  CommandParameter="{Binding PlacementTarget.DataContext,
+                                      RelativeSource={RelativeSource AncestorType=ContextMenu}}"/>
+                    </ContextMenu>
+                </Button.ContextMenu>
+            </Button>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Margin="14,14,14,8">
+            <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}"
+                     ToolTip="搜索文件名或路径"/>
+            <Grid Margin="0,10,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="8"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0"
+                        Content="打开文件夹"
+                        Command="{Binding PickFolderCommand}"/>
+                <Button Grid.Column="2"
+                        Content="关闭文件夹"
+                        Command="{Binding ClearWorkspaceCommand}"/>
+            </Grid>
+        </StackPanel>
+
+        <Border DockPanel.Dock="Bottom"
+                Padding="14,10,14,14"
+                BorderBrush="{DynamicResource BorderBrushSoft}"
+                BorderThickness="0,1,0,0">
+            <Button Content="刷新列表"
+                    Command="{Binding RefreshCommand}"
+                    ToolTip="重新加载收藏和最近打开列表"/>
+        </Border>
+
+        <ScrollViewer VerticalScrollBarVisibility="Auto"
+                      HorizontalScrollBarVisibility="Disabled">
+            <StackPanel Margin="14,0,14,12">
+                <TextBlock Text="{Binding WorkspaceTitle}" Style="{StaticResource SectionHeaderTextStyle}"/>
+                <Border Background="{DynamicResource TreePanelBrush}"
+                        BorderBrush="{DynamicResource BorderBrushSoft}"
+                        BorderThickness="1"
+                        CornerRadius="12"
+                        Padding="6"
+                        Margin="0,0,0,2">
+                    <TreeView ItemsSource="{Binding WorkspaceItems}"
+                              ItemTemplate="{StaticResource FolderTreeTemplate}"/>
+                </Border>
+
+                <Separator Margin="0,14,0,4"
+                           Background="{DynamicResource BorderBrushSoft}"/>
+
+                <Grid Margin="0,14,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="收藏"
+                               Style="{StaticResource SectionHeaderTextStyle}"
+                               Margin="2,0,0,0"
+                               VerticalAlignment="Center"/>
+                    <Button Grid.Column="1"
+                            Style="{StaticResource SidebarActionButtonStyle}"
+                            Content="清失效"
+                            Command="{Binding ClearMissingFavoritesCommand}"
+                            ToolTip="只清理收藏中已删除或失效的记录"/>
+                </Grid>
+                <ItemsControl ItemsSource="{Binding Favorites}"
+                              ItemTemplate="{StaticResource FileItemTemplate}"/>
+
+                <Separator Margin="0,14,0,4"
+                           Background="{DynamicResource BorderBrushSoft}"/>
+
+                <Grid Margin="0,14,0,6">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0"
+                               Text="最近打开"
+                               Style="{StaticResource SectionHeaderTextStyle}"
+                               Margin="2,0,0,0"
+                               VerticalAlignment="Center"/>
+                    <StackPanel Grid.Column="1"
+                                Orientation="Horizontal">
+                        <Button Style="{StaticResource SidebarActionButtonStyle}"
+                                Content="清失效"
+                                Command="{Binding ClearMissingRecentCommand}"
+                                ToolTip="只清理最近打开中已删除或失效的记录"
+                                Margin="0,0,6,0"/>
+                        <Button Style="{StaticResource SidebarActionButtonStyle}"
+                                Content="清空"
+                                Command="{Binding ClearRecentCommand}"
+                                ToolTip="清空最近打开记录，不影响收藏"/>
+                    </StackPanel>
+                </Grid>
+                <ItemsControl ItemsSource="{Binding Recent}"
+                              ItemTemplate="{StaticResource FileItemTemplate}"/>
+            </StackPanel>
+        </ScrollViewer>
+    </DockPanel>
+</UserControl>
+
