@@ -22,6 +22,14 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button x:Name="SidebarToggleButton"
+                            Click="ToggleSidebar"
+                            ToolTip="收起侧栏"
+                            AutomationProperties.Name="收起侧栏"
+                            Width="34" MinWidth="34" Padding="0" Margin="0,0,10,0">
+                        <TextBlock Text="&#xE8A0;" FontFamily="Segoe MDL2 Assets"
+                                   FontSize="17" VerticalAlignment="Center"/>
+                    </Button>
                     <Button Content="打开" Command="{Binding OpenFileCommand}" Margin="0,0,8,0" MinWidth="66"/>
                     <Button Content="收藏" Command="{Binding ToggleFavoriteCommand}" Margin="0,0,8,0" MinWidth="66"/>
                     <Button x:Name="ThemeMenuButton"
@@ -157,19 +165,36 @@
 
         <Grid Background="{DynamicResource AppBackgroundBrush}">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="280" MinWidth="210"/>
-                <ColumnDefinition Width="1"/>
+                <ColumnDefinition x:Name="SidebarColumn" Width="280" MinWidth="210"/>
+                <ColumnDefinition x:Name="SidebarSplitterColumn" Width="5"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <ContentControl Grid.Column="0"
+            <ContentControl x:Name="SidebarHost" Grid.Column="0"
                             prism:RegionManager.RegionName="SidebarRegion"/>
 
-            <GridSplitter Grid.Column="1"
-                          Width="1"
+            <GridSplitter x:Name="SidebarSplitter" Grid.Column="1"
+                          Width="5"
                           HorizontalAlignment="Stretch"
-                          Background="{DynamicResource BorderBrushSoft}"
-                          ShowsPreview="True"/>
+                          Background="Transparent"
+                          Cursor="SizeWE"
+                          ResizeDirection="Columns" ResizeBehavior="PreviousAndNext"
+                          ShowsPreview="True">
+                <GridSplitter.Template>
+                    <ControlTemplate TargetType="GridSplitter">
+                        <Border Background="{TemplateBinding Background}">
+                            <Border x:Name="Grip" Width="1"
+                                    Background="{DynamicResource BorderBrushSoft}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Grip" Property="Width" Value="3"/>
+                                <Setter TargetName="Grip" Property="Background" Value="{DynamicResource AccentBrush}"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </GridSplitter.Template>
+            </GridSplitter>
 
             <Border Grid.Column="2"
                     Background="{DynamicResource ContentBackgroundBrush}"
